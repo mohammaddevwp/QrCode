@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QR Code Generator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <!-- QRCode.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  </head>
+  <body
+    class="bg-gray-100 dark:bg-gray-900 min-h-screen flex items-center justify-center transition-colors duration-300"
+  >
+    <div
+      id="card"
+      class="relative w-full max-w-md mx-auto rounded-xl shadow-lg bg-white dark:bg-gray-800 p-8 flex flex-col items-center transition-colors duration-300"
+    >
+      <!-- دکمه تغییر تم -->
+      <button
+        id="theme-toggle"
+        class="absolute top-4 left-4 text-gray-500 dark:text-gray-300 text-2xl focus:outline-none transition-colors duration-300"
+      >
+        <i id="theme-icon" class="fas fa-moon"></i>
+      </button>
+      <!-- عنوان -->
+      <h1
+        class="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100 text-center"
+      >
+        <span id="animated-title"></span>
+      </h1>
+      <!-- ورودی متن -->
+      <label
+        for="qr-input"
+        class="block text-lg mb-2 text-gray-700 dark:text-gray-300 text-right w-full"
+        >Enter text or URL:</label
+      >
+      <input
+        id="qr-input"
+        type="text"
+        placeholder="متن یا لینک را وارد کنید..."
+        class="w-full mb-4 px-4 py-2 rounded-md border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+      />
+      <!-- دکمه تولید QR -->
+      <button
+        id="generate-btn"
+        class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-md mb-6 transition-colors duration-300"
+      >
+        Generate QR Code
+      </button>
+      <!-- بخش نمایش QR -->
+      <div
+        id="qrcode"
+        class="bg-white dark:bg-gray-900 rounded-xl p-4 flex items-center justify-center"
+      ></div>
+    </div>
+
+    <script>
+      // --- مدیریت تم ---
+      const themeToggle = document.getElementById("theme-toggle");
+      const themeIcon = document.getElementById("theme-icon");
+      const html = document.documentElement;
+
+      // تابع برای تنظیم تم
+      function setTheme(theme) {
+        if (theme === "dark") {
+          html.classList.add("dark");
+          themeIcon.className = "fas fa-sun";
+        } else {
+          html.classList.remove("dark");
+          themeIcon.className = "fas fa-moon";
+        }
+        localStorage.setItem("theme", theme);
+      }
+
+      // بارگذاری تم ذخیره‌شده
+      const savedTheme =
+        localStorage.getItem("theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light");
+      setTheme(savedTheme);
+
+      // تغییر تم با کلیک
+      themeToggle.addEventListener("click", () => {
+        const currentTheme = html.classList.contains("dark") ? "dark" : "light";
+        setTheme(currentTheme === "dark" ? "light" : "dark");
+      });
+
+      // --- تولید QR Code ---
+      const qrInput = document.getElementById("qr-input");
+      const generateBtn = document.getElementById("generate-btn");
+      const qrCodeDiv = document.getElementById("qrcode");
+      let qr;
+
+      function generateQRCode() {
+        const value = qrInput.value.trim();
+        qrCodeDiv.innerHTML = "";
+        if (value) {
+          qr = new QRCode(qrCodeDiv, {
+            text: value,
+            width: 200,
+            height: 200,
+            colorDark: "#111827", // Tailwind gray-900
+            colorLight: "#fff",
+            correctLevel: QRCode.CorrectLevel.H,
+          });
+        }
+      }
+
+      generateBtn.addEventListener("click", generateQRCode);
+
+      // تولید اولیه QR (اختیاری)
+      // generateQRCode();
+
+      // ریسپانسیو: کارت در موبایل
+      // (Tailwind کلاس‌ها کافی هستند)
+
+      const placeholderText = "متن یا لینک را وارد کنید...";
+      let placeholderIndex = 0;
+
+      function typePlaceholder() {
+        if (placeholderIndex <= placeholderText.length) {
+          qrInput.setAttribute(
+            "placeholder",
+            placeholderText.slice(0, placeholderIndex)
+          );
+          placeholderIndex++;
+          setTimeout(typePlaceholder, 80);
+        } else {
+          setTimeout(() => {
+            placeholderIndex = 0;
+            typePlaceholder();
+          }, 1500); // مکث قبل از تکرار
+        }
+      }
+      typePlaceholder();
+
+      // انیمیشن تایپ عنوان
+      const titleText = "QR Code Generator";
+      const animatedTitle = document.getElementById("animated-title");
+      let titleIndex = 0;
+
+      function typeTitle() {
+        if (titleIndex <= titleText.length) {
+          animatedTitle.textContent = titleText.slice(0, titleIndex);
+          titleIndex++;
+          setTimeout(typeTitle, 80);
+        }
+      }
+      typeTitle();
+    </script>
+  </body>
+</html>
